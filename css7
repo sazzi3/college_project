@@ -1,0 +1,206 @@
+<html>
+<head>
+    <style>
+    table, td, th {
+        border: solid 1px #000000;
+    }
+    table {
+        border-collapse: collapse;
+    }
+    th {
+        width: 80px;
+        padding: 10px;
+    }
+    td {
+        vertical-align: top;
+        padding: 6px;
+        height: 80px;
+
+    }
+
+    #june {
+        background-color: #e7ffd6;
+    }
+    #july
+    {
+        background-color: #befce9;
+    }
+    #pyeong {
+        background-color: #ffffff;
+    }
+    #to {
+        background-color: #adcff4;
+    }
+    #il{
+        background-color: #f4adad;    
+    }
+    #ipd{
+        background-color: #f5f4b1;
+    }
+
+    </style>
+</head>    
+
+
+
+<body>
+
+    <h2>고속버스 예매</h2>
+
+<table>
+
+<tr id='june'>
+    <th colspan='7'>2026년 6월 달력</th>
+</tr>
+
+<tr >
+    <th id = 'pyeong'>월</th> 
+    <th>화</th> 
+    <th>수</th> 
+    <th>목</th> 
+    <th>금</th> 
+    <th id = 'to'>토</th> 
+    <th id = 'il'>일</th>
+</tr>
+
+
+<tr>
+    <td>1</td> 
+    <td>2</td> 
+    <td>3<br>지방 선거</td>
+    <td>4</td>
+    <td>5</td> 
+    <td>6</td> 
+    <td>7</td>
+</tr>
+
+
+<tr>
+  <td>8</td>
+  <td>9</td>
+  <td>10</td>
+  <td>11</td>
+  <td>12</td>
+  <td>13</td>
+  <td>14</td>
+</tr>
+
+<tr>
+  <td>15</td>
+  <td id = 'ipd'>16<br>나의 생일 <br>ㅎㅎㅎ</td>
+  <td>17</td>
+  <td>18</td>
+  <td>19</td>
+  <td>20</td>
+  <td>21</td>
+</tr>
+
+<tr>
+  <td>22</td>
+  <td>23</td>
+  <td>24</td>
+  <td>25</td>
+  <td>26</td>
+  <td>27</td>
+  <td>28</td>
+</tr>
+
+<tr>
+  <td>29</td>
+  <td>30</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+
+</table>
+
+
+
+
+
+<br><br><br><br><br>
+
+
+
+
+
+
+
+
+
+
+<table>
+
+<tr id='july'>
+    <th colspan='7'>2026년 7월 달력</th>
+</tr>
+
+<tr>
+    <th id='pyeong'>월</th> 
+    <th>화</th> 
+    <th>수</th> 
+    <th>목</th> 
+    <th>금</th> 
+    <th id='to'>토</th> 
+    <th id='il'>일</th>
+</tr>
+
+<tr>
+    <td></td>
+    <td></td>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+    <td>4</td>
+    <td>5</td>
+</tr>
+
+<tr>
+    <td id = 'ipd'>6 <br> 리눅스<br>2급 응시일</td>
+    <td>7</td>
+    <td>8</td>
+    <td>9</td>
+    <td>10</td>
+    <td>11</td>
+    <td>12</td>
+</tr>
+
+<tr>
+    <td>13</td>
+    <td>14</td>
+    <td>15</td>
+    <td>16</td>
+    <td>17</td>
+    <td id = 'ipd'>18<br> 리눅스<br>2급 응시끝</td>
+    <td>19</td>
+</tr>
+
+<tr>
+    <td>20</td>
+    <td>21</td>
+    <td>22</td>
+    <td>23</td>
+    <td>24</td>
+    <td>25</td>
+    <td>26</td>
+</tr>
+
+<tr>
+    <td>27</td>
+    <td>28</td>
+    <td>29</td>
+    <td>30</td>
+    <td>31</td>
+    <td></td>
+    <td></td>
+</tr>
+
+</table>
+
+
+
+</body>
+</html>
