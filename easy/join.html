@@ -1,0 +1,62 @@
+﻿<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>회원가입 - varchar</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="./index.html"><span>V</span>varchar</a>
+      <nav class="main-nav">
+        <a href="./index.html">홈</a>
+        <a class="active" href="./join.html">회원가입</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="panel form-panel">
+        <p class="kicker">Join</p>
+        <h1>회원가입</h1>
+
+        <form action="./join.php" method="post">
+          <label>
+            닉네임
+            <input name="nickname" type="text" placeholder="닉네임 입력" required />
+          </label>
+
+          <label>
+            이메일
+            <input name="email" type="email" placeholder="test@test.com" required />
+          </label>
+
+          <label>
+            비밀번호
+            <input name="password" type="password" placeholder="비밀번호 입력" required />
+          </label>
+
+          <div class="field-group">
+            <p>성별</p>
+            <label><input name="gender" type="radio" value="남자" checked /> 남자</label>
+            <label><input name="gender" type="radio" value="여자" /> 여자</label>
+          </div>
+
+          <label>
+            좋아하는 장르
+            <select name="genre">
+              <option value="장르 1">장르 1</option>
+              <option value="장르 2">장르 2</option>
+              <option value="장르 3">장르 3</option>
+            </select>
+          </label>
+
+          
+
+          <button type="submit">가입하기</button>
+        </form>
+      </section>
+    </main>
+
+  </body>
+</html>

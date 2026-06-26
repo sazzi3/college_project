@@ -1,0 +1,266 @@
+﻿body {
+    margin: 0;
+    font-family: Arial, "맑은 고딕", sans-serif;
+    background-color: #f5f6fa;
+    color: #222222;
+}
+
+.site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 40px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #dddddd;
+}
+
+.brand {
+    color: #2563eb;
+    font-size: 24px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.brand span {
+    display: inline-block;
+    width: 34px;
+    height: 34px;
+    margin-right: 8px;
+    border-radius: 8px;
+    background-color: #2563eb;
+    color: #ffffff;
+    text-align: center;
+    line-height: 34px;
+}
+
+.main-nav a {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: #222222;
+    text-decoration: none;
+}
+
+.main-nav a:hover,
+.main-nav a.active {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+}
+
+main {
+    width: 1000px;
+    max-width: 90%;
+    margin: 30px auto;
+}
+
+.panel {
+    margin-bottom: 24px;
+    padding: 26px;
+    border: 1px solid #dddddd;
+    border-radius: 12px;
+    background-color: #ffffff;
+}
+
+.hero {
+    background-color: #eff6ff;
+}
+
+.kicker {
+    margin: 0 0 8px;
+    color: #2563eb;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+h1,
+h2,
+h3 {
+    margin-top: 0;
+}
+
+.hero h1 {
+    font-size: 34px;
+}
+
+p,
+li {
+    line-height: 1.6;
+}
+
+.small-button,
+button {
+    display: inline-block;
+    padding: 11px 16px;
+    border: 0;
+    border-radius: 8px;
+    background-color: #2563eb;
+    color: #ffffff;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.small-button:hover,
+button:hover {
+    background-color: #1d4ed8;
+}
+
+.small-button.gray {
+    background-color: #666666;
+}
+
+.card-list {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.story-card {
+    width: 30%;
+    min-width: 220px;
+    padding: 15px;
+    border: 1px solid #dddddd;
+    border-radius: 10px;
+    background-color: #ffffff;
+}
+
+.cover {
+    height: 110px;
+    margin-bottom: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    color: #ffffff;
+    font-weight: bold;
+    display: flex;
+    align-items: end;
+}
+
+.cover.blue {
+    background-color: #1e3a8a;
+}
+
+.cover.green {
+    background-color: #0f766e;
+}
+
+.cover.red {
+    background-color: #9f1239;
+}
+
+.feature-list {
+    padding-left: 20px;
+}
+
+.form-panel,
+.result-panel {
+    width: 560px;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+form label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    margin-top: 6px;
+    padding: 10px;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+.field-group {
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+}
+
+.field-group p {
+    margin: 0 0 8px;
+    font-weight: bold;
+}
+
+.field-group label {
+    display: inline-block;
+    margin: 0 18px 0 0;
+    font-weight: normal;
+}
+
+.field-group input {
+    width: auto;
+    margin-right: 4px;
+}
+
+form button {
+    margin-top: 18px;
+}
+
+table {
+    width: 100%;
+    margin: 20px 0;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 12px;
+    border: 1px solid #dddddd;
+    text-align: left;
+}
+
+th {
+    width: 150px;
+    background-color: #f1f5f9;
+}
+
+.notice {
+    padding: 12px;
+    border: 1px solid #fed7aa;
+    border-radius: 8px;
+    background-color: #fff7ed;
+}
+
+footer {
+    padding: 30px;
+    color: #777777;
+    text-align: center;
+}
+
+@media (max-width: 700px) {
+    .site-header {
+        display: block;
+        padding: 16px 20px;
+    }
+
+    .main-nav {
+        margin-top: 12px;
+    }
+
+    .main-nav a {
+        margin-left: 0;
+        margin-right: 6px;
+    }
+
+    .hero h1 {
+        font-size: 28px;
+    }
+
+    .story-card {
+        width: 100%;
+    }
+}
