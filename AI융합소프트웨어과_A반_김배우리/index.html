@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>varchar - 장면이 살아나는 웹소설</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brandBlue: '#2563EB',
+                        darkBg: '#0B0F19',
+                        darkCard: '#1E293B'
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans KR', 'Inter', 'sans-serif'],
+                        serif: ['Noto Serif KR', 'serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Noto+Serif+KR:wght@600;700;900&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { transition: background-color .25s, color .25s; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+        canvas { max-width: 100%; height: auto; }
+    </style>
+</head>
+<body class="min-h-screen bg-[#F8FAFC] text-slate-900 dark:bg-darkBg dark:text-slate-100 font-sans antialiased selection:bg-blue-100 dark:selection:bg-blue-900">
+    <header class="sticky top-0 z-50 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-[#0F172A]/95 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col gap-3 lg:h-16 lg:flex-row lg:items-center lg:justify-between lg:py-0">
+            <div class="flex items-center justify-between gap-4">
+                <button onclick="switchMode('reader', 'works')" class="flex items-center gap-2 text-2xl font-black tracking-tight text-brandBlue dark:text-blue-400">
+                    <span class="w-8 h-8 rounded-xl bg-blue-600 text-white inline-flex items-center justify-center text-sm">V</span>
+                    <span>varchar</span>
+                </button>
+                <button onclick="toggleTheme()" class="lg:hidden w-10 h-10 inline-flex items-center justify-center rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900" title="테마 변경">
+                    <i data-lucide="sun" class="w-5 h-5 dark:hidden"></i>
+                    <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+                </button>
+            </div>
+
+            <nav id="reader-nav" class="flex flex-wrap items-center gap-1">
+                <button onclick="switchMode('reader','works')" id="nav-reader-works" class="nav-reader px-3 py-2 rounded-xl text-sm font-semibold">작품</button>
+                <button onclick="switchMode('reader','ranking')" id="nav-reader-ranking" class="nav-reader px-3 py-2 rounded-xl text-sm font-semibold">랭킹</button>
+                <button onclick="switchMode('reader','continue')" id="nav-reader-continue" class="nav-reader px-3 py-2 rounded-xl text-sm font-semibold">이어보기</button>
+                <button onclick="switchMode('reader','library')" id="nav-reader-library" class="nav-reader px-3 py-2 rounded-xl text-sm font-semibold">내 서재</button>
+            </nav>
+
+            <nav id="creator-nav" class="hidden flex-wrap items-center gap-1">
+                <button onclick="switchMode('creator','dashboard')" id="nav-creator-dashboard" class="nav-creator px-3 py-2 rounded-xl text-sm font-semibold">내 작품</button>
+                <button onclick="switchMode('creator','new-work')" id="nav-creator-new-work" class="nav-creator px-3 py-2 rounded-xl text-sm font-semibold">새 작품</button>
+                <button onclick="switchMode('creator','scene-editor')" id="nav-creator-scene-editor" class="nav-creator px-3 py-2 rounded-xl text-sm font-semibold">장면 만들기</button>
+                <button onclick="switchMode('creator','branch')" id="nav-creator-branch" class="nav-creator px-3 py-2 rounded-xl text-sm font-semibold">분기 설정</button>
+                <button onclick="switchMode('creator','publish')" id="nav-creator-publish" class="nav-creator px-3 py-2 rounded-xl text-sm font-semibold">공개 준비</button>
+            </nav>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="toggleTheme()" class="hidden lg:inline-flex w-10 h-10 items-center justify-center rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900" title="테마 변경">
+                    <i data-lucide="sun" class="w-5 h-5 dark:hidden"></i>
+                    <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+                </button>
+                <button id="mode-action-button" onclick="switchMode('creator','dashboard')" class="inline-flex items-center gap-2 bg-brandBlue hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-blue-500/10 active:scale-95 transition-all">
+                    <i data-lucide="pen-tool" class="w-4 h-4"></i>
+                    <span>창작자 센터</span>
+                </button>
+                <button id="auth-button" onclick="openAuthModal()" class="border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 transition-all">로그인</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        <main class="space-y-8">
+            <section id="reader-shell" class="space-y-8">
+                <section id="tab-works" class="tab-section space-y-8">
+                    <div class="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard shadow-sm">
+                        <div class="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l from-blue-50 via-cyan-50/60 to-transparent dark:from-blue-950/30 dark:via-cyan-950/10"></div>
+                        <div class="relative z-10 p-6 sm:p-8 lg:p-10 max-w-3xl space-y-5">
+                            <span class="inline-flex items-center gap-2 text-xs font-bold text-brandBlue dark:text-blue-400"><i data-lucide="book-open" class="w-4 h-4"></i> 인터랙티브 웹소설</span>
+                            <h1 class="font-serif text-4xl sm:text-5xl font-black leading-tight tracking-tight text-slate-950 dark:text-white">읽는 순간, 장면이 되는 웹소설</h1>
+                            <p class="text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">선택지와 엔딩, 저장한 장면까지 이어지는 인터랙티브 스토리 플랫폼</p>
+                            <div class="flex flex-wrap gap-3">
+                                <button onclick="openWorkDetail('lia')" class="inline-flex items-center gap-2 rounded-xl bg-brandBlue hover:bg-blue-700 text-white px-5 py-3 text-sm font-bold shadow-lg shadow-blue-500/10"><i data-lucide="play" class="w-4 h-4"></i> 이어보기</button>
+                                <button onclick="openLightCreateFromHome()" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 px-5 py-3 text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"><i data-lucide="wand-2" class="w-4 h-4"></i> 내 버전으로 장면 만들기</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid lg:grid-cols-[1fr_320px] gap-6">
+                        <div class="space-y-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <h2 class="text-xl font-black">오늘 이어보기 좋은 작품</h2>
+                                <div id="genre-filters" class="flex flex-wrap gap-2">
+                                    <button onclick="filterGenre(event,'all')" class="genre-btn active rounded-full px-4 py-2 text-xs font-bold">전체</button>
+                                    <button onclick="filterGenre(event,'fantasy')" class="genre-btn rounded-full px-4 py-2 text-xs font-bold">판타지</button>
+                                    <button onclick="filterGenre(event,'sf')" class="genre-btn rounded-full px-4 py-2 text-xs font-bold">SF</button>
+                                    <button onclick="filterGenre(event,'romance')" class="genre-btn rounded-full px-4 py-2 text-xs font-bold">로맨스</button>
+                                </div>
+                            </div>
+                            <div id="novels-grid" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+                        </div>
+
+                        <aside class="space-y-5">
+                            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-5 shadow-sm">
+                                <h3 class="font-black flex items-center gap-2"><i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i> 실시간 랭킹</h3>
+                                <div id="ranking-list" class="mt-4 space-y-3"></div>
+                            </div>
+                            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-5 shadow-sm">
+                                <h3 class="font-black flex items-center gap-2"><i data-lucide="message-circle" class="w-4 h-4 text-emerald-500"></i> 한줄평 피드</h3>
+                                <div id="review-feed" class="mt-4 space-y-3"></div>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+
+                <section id="tab-work-detail" class="tab-section hidden space-y-5">
+                    <div id="work-detail-box"></div>
+                </section>
+
+                <section id="tab-ranking" class="tab-section hidden space-y-5">
+                    <div class="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-6 shadow-sm">
+                        <h1 class="text-2xl font-black">랭킹</h1>
+                        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">완주율, 엔딩 수집, 장면 저장 수를 함께 반영한 오늘의 인기 작품입니다.</p>
+                    </div>
+                    <div id="ranking-cards" class="grid md:grid-cols-2 gap-5"></div>
+                </section>
+
+                <section id="tab-continue" class="tab-section hidden space-y-5">
+                    <div class="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-6 shadow-sm">
+                        <h1 class="text-2xl font-black">이어보기</h1>
+                        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">마지막으로 저장한 장면과 선택지를 바로 다시 열 수 있습니다.</p>
+                    </div>
+                    <div id="continue-list" class="grid lg:grid-cols-2 gap-5"></div>
+                </section>
+
+                <section id="tab-library" class="tab-section hidden space-y-6">
+                    <div class="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-6 shadow-sm">
+                        <h1 class="text-2xl font-black">내 서재</h1>
+                        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">진행도, 엔딩 수집률, 저장한 장면 컷을 한곳에서 관리합니다.</p>
+                    </div>
+                    <div id="library-progress" class="grid lg:grid-cols-2 gap-5"></div>
+                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-5 shadow-sm">
+                        <div class="flex items-center justify-between gap-3">
+                            <h2 class="font-black">저장한 장면 컷</h2>
+                            <span id="saved-count" class="text-xs font-bold text-slate-500"></span>
+                        </div>
+                        <div id="library-cg-grid" class="mt-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+                    </div>
+                </section>
+
+                <section id="tab-viewer" class="tab-section hidden space-y-5">
+                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-4 sm:p-5 shadow-sm">
+                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                            <div>
+                                <p id="viewer-breadcrumb" class="text-xs font-bold text-brandBlue dark:text-blue-300">작품 &gt; 장면 감상</p>
+                                <h1 id="viewer-page-title" class="mt-1 text-xl font-black">장면 감상</h1>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="openWorkDetail(currentScenarioId)" class="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs font-black">작품으로</button>
+                                <button onclick="restartCurrentStory()" class="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs font-black">처음 보기</button>
+                                <button onclick="saveContinue()" class="rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-3 py-2 text-xs font-black">이어보기 저장</button>
+                                <button onclick="saveCurrentSceneCut()" class="rounded-xl bg-blue-600 text-white px-3 py-2 text-xs font-black">이 장면 저장</button>
+                                <button onclick="openLightCreateFromViewer()" class="rounded-xl border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/30 px-3 py-2 text-xs font-black text-brandBlue dark:text-blue-300">내 버전으로 바꿔보기</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid lg:grid-cols-[1fr_340px] gap-6">
+                        <div class="rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-950 shadow-sm">
+                            <div id="viewer-stage" class="aspect-video relative bg-gradient-to-br from-indigo-950 via-slate-950 to-cyan-950">
+                                <div class="absolute inset-0 opacity-30" style="background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), transparent 18%), radial-gradient(circle at 75% 25%, rgba(96,165,250,.45), transparent 20%);"></div>
+                                <div id="viewer-actor-left" class="absolute left-[8%] bottom-[16%] transition-opacity">
+                                    <div class="w-28 h-36 sm:w-36 sm:h-44 rounded-t-full bg-gradient-to-b from-blue-200 to-blue-600 border-4 border-white/60 shadow-2xl flex items-center justify-center text-5xl">
+                                        <span id="viewer-emoji-left">🙂</span>
+                                    </div>
+                                    <p id="viewer-name-left" class="mt-2 text-center text-xs font-black text-white/90">리아</p>
+                                </div>
+                                <div id="viewer-actor-right" class="absolute right-[10%] bottom-[18%] opacity-60 transition-opacity">
+                                    <div class="w-24 h-32 sm:w-32 sm:h-40 rounded-t-full bg-gradient-to-b from-slate-200 to-slate-600 border-4 border-white/40 shadow-2xl flex items-center justify-center text-4xl">?</div>
+                                    <p class="mt-2 text-center text-xs font-black text-white/70">상대</p>
+                                </div>
+                                <div class="absolute left-4 right-4 bottom-4 rounded-2xl border border-white/15 bg-slate-950/88 p-4 sm:p-5 backdrop-blur">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <span id="viewer-speaker-label" class="rounded-lg bg-blue-600 px-3 py-1 text-xs font-black text-white">리아</span>
+                                        <span id="viewer-story-title" class="text-[11px] font-bold text-white/50">별빛 도서관의 리아</span>
+                                    </div>
+                                    <p id="viewer-dialogue-label" class="mt-3 min-h-[56px] text-sm sm:text-base leading-relaxed text-white"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <aside class="space-y-4">
+                            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-5 shadow-sm">
+                                <div class="flex items-center justify-between">
+                                    <h2 class="font-black">선택지</h2>
+                                    <button onclick="showOtherChoices()" class="text-xs font-black text-brandBlue dark:text-blue-300">다른 선택지 보기</button>
+                                </div>
+                                <div id="viewer-choices" class="mt-4 grid gap-3"></div>
+                            </div>
+                            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-5 shadow-sm">
+                                <h2 class="font-black">읽은 흐름</h2>
+                                <div id="viewer-dialogue-logs" class="custom-scrollbar mt-3 max-h-52 overflow-auto space-y-2 text-xs"></div>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+
+                <section id="tab-light-create" class="tab-section hidden space-y-5">
+                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-4 sm:p-5 shadow-sm">
+                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                            <div>
+                                <p id="remix-breadcrumb" class="text-xs font-bold text-brandBlue dark:text-blue-300">작품 &gt; 내 버전으로 장면 만들기</p>
+                                <h1 class="mt-1 text-xl font-black">내 버전으로 장면 만들기</h1>
+                                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">보고 있던 장면을 바탕으로 한 장면만 가볍게 바꿔봅니다.</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="returnToViewer()" class="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs font-black">감상 화면으로</button>
+                                <button onclick="saveRemixToLibrary()" class="rounded-xl bg-brandBlue text-white px-3 py-2 text-xs font-black">내 서재에 저장</button>
+                                <button onclick="sendRemixToCreator()" class="rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-3 py-2 text-xs font-black">창작자 센터에서 더 만들기</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid lg:grid-cols-[1fr_360px] gap-6">
+                        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-5 shadow-sm space-y-4">
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <label class="space-y-2 text-sm font-bold">장면 제목
+                                    <input id="remix-title" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-3 text-sm" value="별빛 열람실에서">
+                                </label>
+                                <label class="space-y-2 text-sm font-bold">캐릭터 이름
+                                    <input id="remix-character" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-3 text-sm" value="리아">
+                                </label>
+                            </div>
+                            <label class="space-y-2 text-sm font-bold block">대사
+                                <textarea id="remix-dialogue" rows="5" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-3 text-sm leading-relaxed">잠깐만요. 이 책장 뒤에서 누군가 우리를 기다리고 있는 것 같아요.</textarea>
+                            </label>
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <label class="space-y-2 text-sm font-bold">선택지 1
+                                    <input id="remix-choice-1" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-3 text-sm" value="리아와 함께 책장을 밀어본다">
+                                </label>
+                                <label class="space-y-2 text-sm font-bold">선택지 2
+                                    <input id="remix-choice-2" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-3 text-sm" value="먼저 주변의 발자국을 살핀다">
+                                </label>
+                            </div>
+                            <label class="space-y-2 text-sm font-bold block">분위기
+                                <select id="remix-mood" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-3 text-sm">
+                                    <option value="mystery">은은한 미스터리</option>
+                                    <option value="warm">따뜻한 고백</option>
+                                    <option value="urgent">급박한 추격</option>
+                                    <option value="comic">가벼운 코미디</option>
+                                </select>
+                            </label>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="polishDialogue()" class="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-xs font-black">대사 다듬기</button>
+                                <button onclick="suggestChoices()" class="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-xs font-black">선택지 추천</button>
+                                <button onclick="previewRemix()" class="rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-4 py-3 text-xs font-black">장면 미리보기</button>
+                            </div>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-5 shadow-sm">
+                            <h2 class="font-black">장면 미리보기</h2>
+                            <div id="remix-preview" class="mt-4 aspect-[4/5] rounded-2xl bg-gradient-to-br from-indigo-950 to-slate-950 p-5 text-white flex flex-col justify-end shadow-inner">
+                                <p class="text-xs text-white/60">미리보기 버튼을 누르면 장면 카드가 갱신됩니다.</p>
+                            </div>
+                            <p class="mt-3 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">대사 다듬기와 선택지 추천은 데모용 보조 기능입니다. 외부 API와 연결하지 않습니다.</p>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="creator-shell" class="hidden space-y-8">
+                <section id="tab-dashboard" class="tab-section hidden space-y-6">
+                    <div class="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-6 shadow-sm">
+                        <p class="text-xs font-bold text-brandBlue dark:text-blue-300">창작자 센터</p>
+                        <h1 class="mt-1 text-2xl font-black">수정 중인 작품을 바로 이어가세요</h1>
+                        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">작품과 장면, 선택지 분기, 공개 준비를 한 흐름으로 관리합니다.</p>
+                        <button onclick="switchTab('scene-editor')" class="mt-5 rounded-xl bg-brandBlue text-white px-5 py-3 text-sm font-black">장면 만들기</button>
+                    </div>
+                    <div id="creator-work-list" class="grid lg:grid-cols-3 gap-5"></div>
+                </section>
+
+                <section id="tab-new-work" class="tab-section hidden space-y-5">
+                    <div class="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-6 shadow-sm">
+                        <h1 class="text-2xl font-black">새 작품 만들기</h1>
+                        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">세계관과 첫 장면을 정리한 뒤 장면 만들기로 이어갑니다.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-5 grid md:grid-cols-2 gap-4">
+                        <input id="new-work-title" class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-3 text-sm" placeholder="작품 제목">
+                        <select id="new-work-genre" class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-3 text-sm">
+                            <option value="">장르 선택</option>
+                            <option value="genre-1">장르 1</option>
+                            <option value="genre-2">장르 2</option>
+                            <option value="genre-3">장르 3</option>
+                        </select>
+                        <textarea id="new-work-desc" class="md:col-span-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-3 text-sm" rows="5" placeholder="작품 소개"></textarea>
+                        <button onclick="showToast('새 작품 초안이 준비되었습니다.')" class="md:col-span-2 rounded-xl bg-brandBlue text-white px-4 py-3 text-sm font-black">초안 만들기</button>
+                    </div>
+                </section>
+
+                <section id="tab-scene-editor" class="tab-section hidden space-y-6">
+                    <div class="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-6 shadow-sm">
+                        <p class="text-xs font-bold text-brandBlue dark:text-blue-300">창작자 센터 &gt; 장면 만들기</p>
+                        <h1 class="mt-1 text-2xl font-black">장면 편집 / 스토리 컷 메이커</h1>
+                        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">캐릭터, 배경, 대사창과 자막을 조정해 장면 컷을 만듭니다.</p>
+                    </div>
+                    <div class="grid xl:grid-cols-[1fr_360px] gap-6">
+                        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-4 shadow-sm">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+                                <div>
+                                    <h2 class="font-black">장면 미리보기</h2>
+                                    <p class="text-xs text-slate-500">이미지 저장 가능</p>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <button onclick="downloadStudioCg()" class="rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-3 py-2 text-xs font-black">이 장면 저장하기</button>
+                                    <button onclick="saveCgToMyLibrary()" class="rounded-xl bg-brandBlue text-white px-3 py-2 text-xs font-black">내 서재에 보관</button>
+                                    <button onclick="startVisualNovel(currentScenarioId, { resume: true })" class="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs font-black">뷰어로 미리보기</button>
+                                </div>
+                            </div>
+                            <canvas id="studio-canvas" width="1280" height="720" class="w-full rounded-2xl bg-slate-950"></canvas>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-5 shadow-sm space-y-4">
+                            <h2 class="font-black">연출 설정</h2>
+                            <label class="block text-xs font-bold space-y-2">배경
+                                <select id="studio-bg" onchange="drawStudioCanvas()" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3">
+                                    <option value="midnight">한밤의 도서관</option>
+                                    <option value="deepsea">심해 기록실</option>
+                                    <option value="sunset">노을 전망대</option>
+                                    <option value="forest">비밀 정원</option>
+                                </select>
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="text-xs font-bold space-y-2">집중선
+                                    <select id="studio-speedlines" onchange="drawStudioCanvas()" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3"><option value="on">표시</option><option value="off">숨김</option></select>
+                                </label>
+                                <label class="text-xs font-bold space-y-2">대사창
+                                    <select id="studio-hide-text" onchange="drawStudioCanvas()" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3"><option value="off">표시</option><option value="on">숨김</option></select>
+                                </label>
+                            </div>
+                            <label class="flex items-center gap-2 text-xs font-bold"><input id="char1-active" type="checkbox" checked onchange="drawStudioCanvas()"> 캐릭터 1 표시</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <input id="char1-emoji" onchange="drawStudioCanvas()" class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-sm" value="🙂">
+                                <select id="char1-skin" onchange="drawStudioCanvas()" class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-sm"><option value="indigo">파랑</option><option value="pink">분홍</option><option value="amber">노랑</option></select>
+                                <input id="char1-x" type="range" min="-180" max="180" value="0" oninput="drawStudioCanvas()">
+                                <input id="char1-scale" type="range" min="0.7" max="1.4" step="0.1" value="1" oninput="drawStudioCanvas()">
+                            </div>
+                            <label class="flex items-center gap-2 text-xs font-bold"><input id="char1-flip" type="checkbox" onchange="drawStudioCanvas()"> 캐릭터 1 좌우 반전</label>
+                            <label class="flex items-center gap-2 text-xs font-bold"><input id="char2-active" type="checkbox" checked onchange="drawStudioCanvas()"> 캐릭터 2 표시</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <input id="char2-emoji" onchange="drawStudioCanvas()" class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-sm" value="키">
+                                <select id="char2-skin" onchange="drawStudioCanvas()" class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-sm"><option value="slate">회색</option><option value="cyan">청록</option><option value="amber">노랑</option></select>
+                                <input id="char2-x" type="range" min="-180" max="180" value="0" oninput="drawStudioCanvas()">
+                                <input id="char2-scale" type="range" min="0.7" max="1.4" step="0.1" value="1" oninput="drawStudioCanvas()">
+                            </div>
+                            <label class="flex items-center gap-2 text-xs font-bold"><input id="char2-flip" type="checkbox" checked onchange="drawStudioCanvas()"> 캐릭터 2 좌우 반전</label>
+                            <label class="block text-xs font-bold space-y-2">이름
+                                <input id="studio-speaker" oninput="drawStudioCanvas()" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3" value="리아">
+                            </label>
+                            <input id="studio-speaker-color" type="color" value="#2563EB" oninput="drawStudioCanvas()" class="w-full h-10 rounded-xl">
+                            <textarea id="studio-dialogue" oninput="drawStudioCanvas()" rows="4" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-sm">별빛이 사라지기 전에, 우리가 고른 길의 끝을 확인해야 해.</textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tab-branch" class="tab-section hidden space-y-5">
+                    <div class="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-6 shadow-sm"><h1 class="text-2xl font-black">분기 설정</h1><p class="mt-2 text-sm text-slate-500">선택지가 어떤 장면과 엔딩으로 이어지는지 정리합니다.</p></div>
+                    <div id="branch-map" class="grid md:grid-cols-3 gap-4"></div>
+                </section>
+
+                <section id="tab-publish" class="tab-section hidden space-y-5">
+                    <div class="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-6 shadow-sm"><h1 class="text-2xl font-black">공개 준비</h1><p class="mt-2 text-sm text-slate-500">공개 범위, 회차 예약, 한줄 소개를 관리합니다.</p></div>
+                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-5 space-y-3">
+                        <label class="flex items-center justify-between gap-3 text-sm font-bold">작품 공개 <input type="checkbox" checked></label>
+                        <label class="flex items-center justify-between gap-3 text-sm font-bold">한줄평 허용 <input type="checkbox" checked></label>
+                        <label class="flex items-center justify-between gap-3 text-sm font-bold">장면 저장 허용 <input type="checkbox" checked></label>
+                        <button onclick="showToast('공개 설정이 저장되었습니다.')" class="rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-4 py-3 text-sm font-black">설정 저장</button>
+                    </div>
+                </section>
+            </section>
+        </main>
+    </div>
+
+    <div id="auth-modal" class="fixed inset-0 z-[60] hidden bg-slate-950/50 p-4 backdrop-blur-sm">
+        <div class="mx-auto mt-12 max-w-md rounded-3xl bg-white dark:bg-darkCard border border-slate-200 dark:border-slate-800 p-6 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-black">varchar 시작하기</h2>
+                    <p class="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">계정을 만들면 이어보기, 엔딩 기록, 저장한 장면을 보관할 수 있어요.</p>
+                </div>
+                <button onclick="closeAuthModal()" class="w-9 h-9 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"><i data-lucide="x" class="w-5 h-5 mx-auto"></i></button>
+            </div>
+            <div class="mt-5 space-y-3">
+                <input id="auth-email" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-sm" placeholder="이메일">
+                <input id="auth-password" type="password" oninput="checkPasswordStrength(this.value)" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-sm" placeholder="비밀번호">
+                <p id="pwd-validator" class="text-[11px] text-slate-400">이메일에는 @가 필요하고, 비밀번호는 8자 이상이어야 합니다.</p>
+                <button onclick="submitJoinForm()" class="w-full rounded-xl bg-brandBlue text-white py-3 text-sm font-black">무료로 시작하기</button>
+                <button onclick="guestStart()" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 py-3 text-sm font-black text-slate-700 dark:text-slate-200">비회원으로 샘플 보기</button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="handleSocialConnect('Google')" class="rounded-xl bg-slate-50 dark:bg-slate-900 py-2.5 text-xs font-bold">Google로 계속</button>
+                    <button onclick="handleSocialConnect('Kakao')" class="rounded-xl bg-slate-50 dark:bg-slate-900 py-2.5 text-xs font-bold">Kakao로 계속</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[70] space-y-2 pointer-events-none"></div>
+
+    <script>
+        const novels = [
+            { id: 'lia', title: '별빛 도서관의 리아', genre: 'fantasy', genreLabel: '판타지', time: '12분', choices: 12, endings: 3, lastScene: '첫 장면', rating: 4.8, cover: 'from-indigo-900 to-blue-700', desc: '밤마다 결말이 바뀌는 도서관에서 독자가 직접 첫 문장을 고르는 이야기입니다.' },
+            { id: 'deepsea', title: '심해 기록 보관소', genre: 'sf', genreLabel: 'SF', time: '18분', choices: 14, endings: 5, lastScene: '첫 장면', rating: 4.6, cover: 'from-cyan-950 to-slate-800', desc: '수심 900미터 아래에서 미래의 구조 신호를 발견한 탐사 기록입니다.' },
+            { id: 'letter', title: '달빛 우체국의 답장', genre: 'romance', genreLabel: '로맨스', time: '9분', choices: 8, endings: 2, lastScene: '첫 번째 편지', rating: 4.7, cover: 'from-rose-900 to-amber-700', desc: '보내지 못한 편지가 달빛 우체국을 거쳐 돌아오는 짧은 로맨스입니다.' },
+            { id: 'garden', title: '비밀 정원의 계약자', genre: 'fantasy', genreLabel: '판타지', time: '15분', choices: 10, endings: 4, lastScene: '유리온실 입구', rating: 4.5, cover: 'from-emerald-900 to-teal-700', desc: '계약을 맺은 정원사와 말하는 온실이 숨겨둔 약속을 찾아갑니다.' }
+        ];
+
+        const reviews = [
+            ['mira', '엔딩 하나 보고 나니까 다른 선택지가 계속 궁금해졌어요.'],
+            ['page9', '장면 저장해두고 다시 보는 재미가 꽤 좋습니다.'],
+            ['blue', '웹소설인데 이벤트씬처럼 넘어가는 느낌이 신선해요.']
+        ];
+
+        const novelsScenarios = {
+            lia: {
+                title: '별빛 도서관의 리아',
+                start: { label: '첫 장면', speaker: '리아', emoji: '🙂', text: '이 도서관은 밤마다 책의 결말이 바뀌어요. 오늘은 당신이 첫 문장을 골라야 해요.', choices: [
+                    { text: '가장 오래된 책을 펼친다', next: 'oldBook' },
+                    { text: '리아에게 숨겨진 규칙을 묻는다', next: 'rule' }
+                ] },
+                oldBook: { label: '오래된 책', speaker: '리아', emoji: '!', text: '책장 사이에서 별빛이 흘러나와요. 누군가 이미 우리보다 먼저 이 결말을 읽었나 봐요.', choices: [
+                    { text: '별빛을 따라간다', next: 'starEnding' },
+                    { text: '책 표지의 이름을 확인한다', next: 'name' }
+                ] },
+                rule: { label: '숨겨진 규칙', speaker: '리아', emoji: '?', text: '규칙은 하나예요. 선택을 미루면, 이야기가 대신 선택해요.', choices: [
+                    { text: '그럼 지금 선택하겠다고 말한다', next: 'oldBook' },
+                    { text: '일부러 아무것도 고르지 않는다', next: 'quietEnding' }
+                ] },
+                name: { label: '표지의 이름', speaker: '관리자', emoji: '키', text: '표지에는 당신의 이름이 적혀 있습니다. 이 도서관은 독자를 등장인물로 기억하니까요.', choices: [
+                    { text: '내 이름이 적힌 페이지를 찢는다', next: 'quietEnding' },
+                    { text: '리아에게 마지막 페이지를 맡긴다', next: 'starEnding' }
+                ] },
+                starEnding: { label: '별빛 엔딩', speaker: '엔딩: 별을 빌려 간 독자', emoji: '*', text: '리아는 마지막 페이지에 작은 별을 꽂아두었습니다. 다음 밤, 당신은 같은 장면에서 다른 선택을 떠올립니다.', choices: [] },
+                quietEnding: { label: '닫힌 책장 엔딩', speaker: '엔딩: 닫힌 책장의 약속', emoji: '달', text: '아무것도 고르지 않은 밤, 도서관은 조용히 문을 닫았습니다. 하지만 책등에는 아직 따뜻한 빛이 남아 있습니다.', choices: [] }
+            },
+            deepsea: {
+                title: '심해 기록 보관소',
+                start: { label: '잠수정 입구', speaker: '노아', emoji: 'N', text: '수심 900미터 아래, 열리지 않아야 할 기록함이 먼저 우리를 불렀어.', choices: [
+                    { text: '기록함의 봉인을 푼다', next: 'open' },
+                    { text: '통신실로 돌아간다', next: 'signal' }
+                ] },
+                open: { label: '미래의 기록함', speaker: '노아', emoji: '!', text: '기록함 안에는 미래의 구조 신호가 들어 있어. 보낸 사람은... 우리야.', choices: [
+                    { text: '미래의 신호를 재생한다', next: 'endingA' },
+                    { text: '기록을 복사해 숨긴다', next: 'endingB' }
+                ] },
+                signal: { label: '통신실', speaker: '시스템', emoji: 'S', text: '통신실 화면에 같은 문장이 반복됩니다. "지금 열지 않으면 늦는다."', choices: [
+                    { text: '다시 기록함으로 간다', next: 'open' },
+                    { text: '기지 전원을 내린다', next: 'endingB' }
+                ] },
+                endingA: { label: '되감긴 조난', speaker: '엔딩: 되감긴 조난', emoji: '~', text: '신호가 재생되는 순간, 바다는 잠시 시간을 거슬렀습니다.', choices: [] },
+                endingB: { label: '침묵의 백업', speaker: '엔딩: 침묵의 백업', emoji: 'D', text: '복사된 기록은 아무도 모르는 곳에 남아 다음 독자를 기다립니다.', choices: [] }
+            },
+            letter: {
+                title: '달빛 우체국의 답장',
+                start: { label: '첫 번째 편지', speaker: '윤', emoji: 'Y', text: '보내지 못한 편지가 달빛 우체통 안에서 은색 봉투로 돌아왔어.', choices: [
+                    { text: '봉투를 바로 열어본다', next: 'openLetter' },
+                    { text: '발신인을 먼저 확인한다', next: 'sender' }
+                ] },
+                openLetter: { label: '은색 봉투', speaker: '윤', emoji: 'Y', text: '편지에는 네가 말하지 못한 문장이, 누군가의 글씨로 적혀 있었어.', choices: [
+                    { text: '답장을 다시 쓴다', next: 'warmEnding' },
+                    { text: '편지를 우체국에 맡긴다', next: 'moonEnding' }
+                ] },
+                sender: { label: '발신인 없는 밤', speaker: '우체국장', emoji: 'U', text: '달빛 우체국은 받는 사람이 준비되었을 때만 발신인을 알려준단다.', choices: [
+                    { text: '준비됐다고 말한다', next: 'openLetter' },
+                    { text: '오늘은 읽지 않기로 한다', next: 'moonEnding' }
+                ] },
+                warmEnding: { label: '답장의 온도', speaker: '엔딩: 답장의 온도', emoji: 'W', text: '짧은 답장은 새벽 우체통 안에서 따뜻하게 빛났습니다.', choices: [] },
+                moonEnding: { label: '달빛 보관함', speaker: '엔딩: 달빛 보관함', emoji: 'M', text: '읽지 않은 편지는 달빛 보관함에 남아 다음 밤을 기다렸습니다.', choices: [] }
+            },
+            garden: {
+                title: '비밀 정원의 계약자',
+                start: { label: '유리온실 입구', speaker: '세온', emoji: 'S', text: '정원 문은 계약자의 이름을 부를 때만 열린대. 그런데 방금 네 이름을 불렀어.', choices: [
+                    { text: '문 안으로 들어간다', next: 'greenhouse' },
+                    { text: '계약 조건을 먼저 묻는다', next: 'contract' }
+                ] },
+                greenhouse: { label: '말하는 온실', speaker: '온실', emoji: 'G', text: '어서 와. 이곳에 핀 꽃들은 아직 고르지 않은 선택의 색을 닮았단다.', choices: [
+                    { text: '푸른 꽃을 꺾는다', next: 'blueEnding' },
+                    { text: '아무 꽃도 꺾지 않는다', next: 'seedEnding' }
+                ] },
+                contract: { label: '계약서', speaker: '세온', emoji: 'S', text: '계약 조건은 단순해. 네가 한 선택 하나가 정원 한 구역을 바꾸는 거야.', choices: [
+                    { text: '계약서에 이름을 쓴다', next: 'greenhouse' },
+                    { text: '정원 밖에서 기다린다', next: 'seedEnding' }
+                ] },
+                blueEnding: { label: '푸른 꽃의 문', speaker: '엔딩: 푸른 꽃의 문', emoji: 'B', text: '푸른 꽃은 문이 되었고, 정원은 당신에게 다음 계절을 맡겼습니다.', choices: [] },
+                seedEnding: { label: '남겨둔 씨앗', speaker: '엔딩: 남겨둔 씨앗', emoji: 'G', text: '고르지 않은 선택은 씨앗이 되어 조용히 땅속으로 스며들었습니다.', choices: [] }
+            }
+        };
+
+        let currentMode = 'reader';
+        let currentTab = 'works';
+        let currentScenarioId = 'lia';
+        let currentSceneNode = 'start';
+        let currentDetailId = 'lia';
+        let sceneHistory = [];
+        let isLoggedIn = false;
+        let isRestoringHistory = false;
+
+        let savedProgress = loadState('varchar-progress', {
+            lia: { sceneNode: 'oldBook', lastSceneLabel: '오래된 책', selectedChoices: ['가장 오래된 책을 펼친다'], endingsSeen: [] },
+            deepsea: { sceneNode: 'signal', lastSceneLabel: '통신실', selectedChoices: ['통신실로 돌아간다'], endingsSeen: [] },
+            garden: { sceneNode: 'start', lastSceneLabel: '유리온실 입구', selectedChoices: [], endingsSeen: [] }
+        });
+        let savedSceneCuts = loadState('varchar-cuts', [
+            { id: 1, title: '리아 - 오래된 책', mood: '뷰어에서 저장' },
+            { id: 2, title: '노아 - 통신실', mood: '심해 기록실' }
+        ]);
+
+        function loadState(key, fallback) {
+            try {
+                const raw = localStorage.getItem(key);
+                return raw ? JSON.parse(raw) : fallback;
+            } catch (error) {
+                return fallback;
+            }
+        }
+
+        function persistState() {
+            localStorage.setItem('varchar-progress', JSON.stringify(savedProgress));
+            localStorage.setItem('varchar-cuts', JSON.stringify(savedSceneCuts));
+        }
+
+        // 브라우저 뒤로가기를 앱 내부 이동처럼 쓰기 위한 기록 관리입니다.
+        function makeHistoryState(mode = currentMode, tab = currentTab) {
+            return {
+                mode,
+                tab,
+                scenarioId: currentScenarioId,
+                sceneNode: currentSceneNode,
+                detailId: currentDetailId
+            };
+        }
+
+        function routeHash(state) {
+            const parts = [state.mode, state.tab];
+            if (state.tab === 'work-detail') parts.push(state.detailId);
+            if (state.tab === 'viewer') parts.push(state.scenarioId, state.sceneNode);
+            if (state.tab === 'light-create') parts.push(state.scenarioId);
+            return '#' + parts.filter(Boolean).map(encodeURIComponent).join('/');
+        }
+
+        function pushAppHistory(mode = currentMode, tab = currentTab, replace = false) {
+            if (isRestoringHistory) return;
+            const state = makeHistoryState(mode, tab);
+            const url = routeHash(state);
+            if (replace) {
+                history.replaceState(state, '', url);
+                return;
+            }
+            if (location.hash === url) {
+                history.replaceState(state, '', url);
+                return;
+            }
+            history.pushState(state, '', url);
+        }
+
+        function restoreAppHistory(state) {
+            if (!state) {
+                state = makeHistoryState('reader', 'works');
+            }
+            isRestoringHistory = true;
+            currentScenarioId = state.scenarioId || currentScenarioId;
+            currentSceneNode = state.sceneNode || 'start';
+            currentDetailId = state.detailId || currentScenarioId;
+            if (state.tab === 'work-detail') {
+                openWorkDetail(currentDetailId);
+            } else if (state.tab === 'viewer') {
+                switchMode('reader', 'viewer');
+                renderViewerFrame();
+            } else if (state.tab === 'light-create') {
+                switchMode('reader', 'light-create');
+                previewRemix();
+            } else {
+                switchMode(state.mode || 'reader', state.tab || 'works');
+            }
+            isRestoringHistory = false;
+        }
+
+        // 독자 홈과 창작자 센터를 단일 HTML 안에서 전환합니다.
+        function switchMode(mode, tab) {
+            currentMode = mode;
+            document.getElementById('reader-shell').classList.toggle('hidden', mode !== 'reader');
+            document.getElementById('creator-shell').classList.toggle('hidden', mode !== 'creator');
+            document.getElementById('reader-nav').classList.toggle('hidden', mode !== 'reader');
+            document.getElementById('creator-nav').classList.toggle('hidden', mode !== 'creator');
+
+            const action = document.getElementById('mode-action-button');
+            if (mode === 'reader') {
+                action.onclick = () => switchMode('creator', 'dashboard');
+                action.innerHTML = '<i data-lucide="pen-tool" class="w-4 h-4"></i><span>창작자 센터</span>';
+                switchTab(tab || 'works');
+            } else {
+                action.onclick = () => switchMode('reader', 'works');
+                action.innerHTML = '<i data-lucide="home" class="w-4 h-4"></i><span>독자 홈으로</span>';
+                switchTab(tab || 'dashboard');
+                setTimeout(drawStudioCanvas, 30);
+            }
+            lucide.createIcons();
+            pushAppHistory(mode, tab || (mode === 'reader' ? 'works' : 'dashboard'));
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-section').forEach(section => section.classList.add('hidden'));
+            const target = document.getElementById(`tab-${tab}`);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-reader, .nav-creator').forEach(button => {
+                button.className = button.className.replace(' text-brandBlue bg-blue-50 dark:text-blue-300 dark:bg-blue-950/40', '');
+                button.classList.add('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+            });
+            const active = document.getElementById(`nav-${currentMode}-${tab}`);
+            if (active) {
+                active.classList.remove('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+                active.className += ' text-brandBlue bg-blue-50 dark:text-blue-300 dark:bg-blue-950/40';
+            }
+            if (tab === 'scene-editor') setTimeout(drawStudioCanvas, 30);
+            lucide.createIcons();
+        }
+
+        function getNovel(id) {
+            return novels.find(novel => novel.id === id);
+        }
+
+        function getProgress(id) {
+            return savedProgress[id] || { sceneNode: 'start', lastSceneLabel: '첫 장면', selectedChoices: [], endingsSeen: [] };
+        }
+
+        function getProgressPercent(id) {
+            const progress = getProgress(id);
+            const story = novelsScenarios[id];
+            if (!story) return 0;
+            const total = Object.keys(story).filter(key => key !== 'title').length;
+            const seen = new Set(['start', progress.sceneNode, ...progress.selectedChoices.map(choice => choice.nextNode).filter(Boolean)]).size;
+            return Math.min(100, Math.round((seen / total) * 100));
+        }
+
+        function hasScenario(id) {
+            return !!novelsScenarios[id];
+        }
+
+        // 작품 카드는 상세 페이지로 들어가게 하여 감상 전 맥락을 제공합니다.
+        function renderNovels() {
+            const grid = document.getElementById('novels-grid');
+            grid.innerHTML = novels.map(novel => {
+                const progress = getProgress(novel.id);
+                const percent = getProgressPercent(novel.id);
+                const action = percent > 0 ? '이어보기' : '처음부터 보기';
+                return `
+                    <article class="novel-card rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard shadow-sm" data-genre="${novel.genre}">
+                        <button onclick="openWorkDetail('${novel.id}')" class="block w-full text-left">
+                            <div class="aspect-[4/3] bg-gradient-to-br ${novel.cover} p-4 flex items-end">
+                                <div class="rounded-xl bg-white/12 backdrop-blur px-3 py-2 text-white border border-white/15">
+                                    <p class="text-[11px] font-bold">${novel.genreLabel}</p>
+                                    <h3 class="font-serif text-lg font-black leading-tight">${novel.title}</h3>
+                                </div>
+                            </div>
+                        </button>
+                        <div class="p-4 space-y-3">
+                            <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                                <span>감상 ${novel.time}</span><span>선택지 ${novel.choices}개</span>
+                                <span>엔딩 ${novel.endings}개</span><span>평점 ${novel.rating}</span>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-[11px] font-bold"><span>내 진행률</span><span>${percent}%</span></div>
+                                <div class="mt-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden"><div class="h-full bg-brandBlue" style="width:${percent}%"></div></div>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">마지막 장면: <strong class="text-slate-700 dark:text-slate-200">${progress.lastSceneLabel || novel.lastScene}</strong></p>
+                            <button onclick="openWorkDetail('${novel.id}')" class="w-full rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 py-3 text-xs font-black">${action}</button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function openWorkDetail(id) {
+            currentDetailId = id;
+            const novel = getNovel(id);
+            const progress = getProgress(id);
+            const percent = getProgressPercent(id);
+            const canResume = progress.sceneNode && progress.sceneNode !== 'start';
+            document.getElementById('work-detail-box').innerHTML = `
+                <div class="rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard shadow-sm">
+                    <div class="bg-gradient-to-br ${novel.cover} p-6 sm:p-8 text-white">
+                        <p class="text-xs font-bold opacity-80">작품 &gt; ${novel.title}</p>
+                        <h1 class="mt-2 font-serif text-3xl sm:text-4xl font-black">${novel.title}</h1>
+                        <p class="mt-3 max-w-2xl text-sm leading-relaxed text-white/80">${novel.desc}</p>
+                    </div>
+                    <div class="p-5 sm:p-6 grid lg:grid-cols-[1fr_280px] gap-6">
+                        <div class="space-y-4">
+                            <div class="grid sm:grid-cols-3 gap-3 text-sm">
+                                <span class="rounded-xl bg-slate-50 dark:bg-slate-900 p-3">장르<br><strong>${novel.genreLabel}</strong></span>
+                                <span class="rounded-xl bg-slate-50 dark:bg-slate-900 p-3">예상 감상 시간<br><strong>${novel.time}</strong></span>
+                                <span class="rounded-xl bg-slate-50 dark:bg-slate-900 p-3">선택지 / 엔딩<br><strong>${novel.choices}개 / ${novel.endings}개</strong></span>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-bold"><span>내 진행률</span><span>${percent}%</span></div>
+                                <div class="mt-2 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden"><div class="h-full bg-brandBlue" style="width:${percent}%"></div></div>
+                                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">마지막 장면: ${progress.lastSceneLabel || '첫 장면'}</p>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <button onclick="startVisualNovel('${id}', { resume: false })" class="w-full rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 py-3 text-xs font-black">처음부터 보기</button>
+                            <button onclick="startVisualNovel('${id}', { resume: true })" class="w-full rounded-xl bg-brandBlue text-white py-3 text-xs font-black ${canResume ? '' : 'opacity-60'}">${canResume ? '이어보기' : '이어보기 없음'}</button>
+                            <button onclick="openLightCreateForNovel('${id}')" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 py-3 text-xs font-black">내 버전 열기</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            switchMode('reader', 'work-detail');
+        }
+
+        function renderRanking() {
+            document.getElementById('ranking-list').innerHTML = novels.slice(0, 3).map((novel, idx) => `
+                <button onclick="openWorkDetail('${novel.id}')" class="w-full flex items-center gap-3 text-left">
+                    <span class="w-7 h-7 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 inline-flex items-center justify-center text-xs font-black">${idx + 1}</span>
+                    <span class="min-w-0"><strong class="block truncate text-sm">${novel.title}</strong><span class="text-[11px] text-slate-500">엔딩 ${novel.endings}개 · 진행률 ${getProgressPercent(novel.id)}%</span></span>
+                </button>
+            `).join('');
+            document.getElementById('ranking-cards').innerHTML = novels.map((novel, idx) => `
+                <button onclick="openWorkDetail('${novel.id}')" class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-5 shadow-sm flex gap-4 text-left">
+                    <span class="text-3xl font-black text-brandBlue">${idx + 1}</span>
+                    <span><strong class="font-black">${novel.title}</strong><span class="block mt-1 text-sm text-slate-500">완주 예상 ${novel.time} · 선택지 ${novel.choices}개 · 엔딩 ${novel.endings}개</span></span>
+                </button>
+            `).join('');
+        }
+
+        function renderReviews() {
+            document.getElementById('review-feed').innerHTML = reviews.map(([name, text]) => `
+                <div class="rounded-xl bg-slate-50 dark:bg-slate-900 p-3">
+                    <p class="text-[11px] font-black text-brandBlue">${name}</p>
+                    <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-300">${text}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderLibrary() {
+            const ids = Object.keys(savedProgress);
+            const progressHtml = ids.map(id => {
+                const novel = getNovel(id);
+                if (!novel) return '';
+                const progress = getProgress(id);
+                const percent = getProgressPercent(id);
+                return `
+                    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-5 shadow-sm">
+                        <h3 class="font-black">${novel.title}</h3>
+                        <p class="mt-1 text-sm text-slate-500">최근 본 위치: ${progress.lastSceneLabel || '첫 장면'}</p>
+                        <div class="mt-4 grid grid-cols-2 gap-3 text-xs">
+                            <span class="rounded-xl bg-slate-50 dark:bg-slate-900 p-3">마지막 장면<br><strong>${progress.lastSceneLabel || '첫 장면'}</strong></span>
+                            <span class="rounded-xl bg-slate-50 dark:bg-slate-900 p-3">엔딩 수집률<br><strong>엔딩 ${progress.endingsSeen.length}/${novel.endings}</strong></span>
+                            <span class="rounded-xl bg-slate-50 dark:bg-slate-900 p-3">선택지 확인률<br><strong>선택지 ${progress.selectedChoices.length}/${novel.choices}</strong></span>
+                            <span class="rounded-xl bg-slate-50 dark:bg-slate-900 p-3">진행률<br><strong>${percent}%</strong></span>
+                        </div>
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <button onclick="startVisualNovel('${id}', { resume: true })" class="rounded-xl bg-brandBlue text-white px-4 py-2.5 text-xs font-black">이어보기</button>
+                            <button onclick="startVisualNovel('${id}', { resume: false })" class="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-xs font-black">다른 선택지 보기</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('library-progress').innerHTML = progressHtml;
+            document.getElementById('continue-list').innerHTML = progressHtml || '<p class="text-sm text-slate-500">저장된 이어보기가 없습니다.</p>';
+            renderSavedCuts();
+        }
+
+        function renderSavedCuts() {
+            document.getElementById('saved-count').innerText = `${savedSceneCuts.length}개`;
+            const grid = document.getElementById('library-cg-grid');
+            if (!savedSceneCuts.length) {
+                grid.innerHTML = '<p class="text-sm text-slate-500">아직 저장한 장면 컷이 없습니다.</p>';
+                return;
+            }
+            grid.innerHTML = savedSceneCuts.map(cut => `
+                <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-3">
+                    <div class="aspect-video rounded-xl bg-gradient-to-br from-indigo-950 to-cyan-950 flex items-center justify-center text-white text-xs font-black">장면 컷</div>
+                    <p class="mt-2 truncate text-xs font-bold">${cut.title}</p>
+                    <p class="text-[11px] text-slate-500">${cut.mood}</p>
+                </div>
+            `).join('');
+        }
+
+        function filterGenre(evt, genre) {
+            document.querySelectorAll('.genre-btn').forEach(btn => {
+                btn.className = 'genre-btn rounded-full px-4 py-2 text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300';
+            });
+            evt.currentTarget.className = 'genre-btn active rounded-full px-4 py-2 text-xs font-bold bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900';
+            document.querySelectorAll('.novel-card').forEach(card => {
+                card.classList.toggle('hidden', genre !== 'all' && card.dataset.genre !== genre);
+            });
+        }
+
+        // 비주얼노벨 뷰어의 현재 장면과 선택지를 갱신합니다.
+        function startVisualNovel(scenarioId, options = {}) {
+            if (!hasScenario(scenarioId)) {
+                showToast('이 작품은 샘플 준비 중입니다.');
+                return;
+            }
+            currentScenarioId = scenarioId;
+            const progress = getProgress(scenarioId);
+            currentSceneNode = options.resume && progress.sceneNode ? progress.sceneNode : 'start';
+            sceneHistory = [];
+            switchMode('reader', 'viewer');
+            document.getElementById('viewer-dialogue-logs').innerHTML = `<div class="rounded-xl bg-blue-50 dark:bg-blue-950/30 p-2 text-brandBlue dark:text-blue-300 font-bold">${options.resume ? '저장된 장면에서 이어봅니다.' : '처음 장면부터 시작합니다.'}</div>`;
+            renderViewerFrame();
+        }
+
+        function renderViewerFrame() {
+            const story = novelsScenarios[currentScenarioId];
+            const node = story[currentSceneNode];
+            const novel = getNovel(currentScenarioId);
+            document.getElementById('viewer-breadcrumb').innerText = `작품 > ${story.title} > 장면 감상`;
+            document.getElementById('viewer-page-title').innerText = `${story.title} 감상`;
+            document.getElementById('viewer-story-title').innerText = story.title;
+            document.getElementById('viewer-speaker-label').innerText = node.speaker;
+            document.getElementById('viewer-dialogue-label').innerText = node.text;
+            document.getElementById('viewer-emoji-left').innerText = node.emoji || '🙂';
+            document.getElementById('viewer-name-left').innerText = node.speaker.includes('엔딩') ? '기억' : node.speaker;
+            document.getElementById('viewer-actor-left').style.opacity = node.speaker.includes('엔딩') ? '0.45' : '1';
+            if (novel) novel.lastScene = node.label;
+
+            const choiceArea = document.getElementById('viewer-choices');
+            choiceArea.innerHTML = '';
+            if (!node.choices.length) {
+                const endingName = node.speaker;
+                savedProgress[currentScenarioId] = {
+                    ...getProgress(currentScenarioId),
+                    sceneNode: currentSceneNode,
+                    lastSceneLabel: node.label,
+                    endingsSeen: Array.from(new Set([...getProgress(currentScenarioId).endingsSeen, endingName]))
+                };
+                persistState();
+                const restartBtn = makeChoiceButton('처음부터 다시 보기', () => startVisualNovel(currentScenarioId, { resume: false }));
+                const backBtn = makeChoiceButton('다른 선택지로 돌아가기', () => goBackToPreviousChoice());
+                choiceArea.appendChild(restartBtn);
+                choiceArea.appendChild(backBtn);
+            } else {
+                node.choices.forEach((choice, index) => {
+                    const btn = makeChoiceButton(`${index + 1}. ${choice.text}`, () => {
+                        appendDialogueLog(node.speaker, node.text);
+                        appendDialogueLog('선택', choice.text);
+                        sceneHistory.push(currentSceneNode);
+                        const progress = getProgress(currentScenarioId);
+                        savedProgress[currentScenarioId] = {
+                            ...progress,
+                            sceneNode: choice.next,
+                            lastSceneLabel: novelsScenarios[currentScenarioId][choice.next].label,
+                            selectedChoices: [...progress.selectedChoices, { text: choice.text, fromNode: currentSceneNode, nextNode: choice.next }]
+                        };
+                        currentSceneNode = choice.next;
+                        persistState();
+                        refreshAll();
+                        renderViewerFrame();
+                        pushAppHistory('reader', 'viewer');
+                    });
+                    choiceArea.appendChild(btn);
+                });
+            }
+            lucide.createIcons();
+        }
+
+        function makeChoiceButton(text, handler) {
+            const btn = document.createElement('button');
+            btn.className = 'w-full text-left rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:bg-blue-600 hover:text-white p-3 text-xs font-bold transition-colors';
+            btn.innerText = text;
+            btn.onclick = handler;
+            return btn;
+        }
+
+        function appendDialogueLog(speaker, text) {
+            const logs = document.getElementById('viewer-dialogue-logs');
+            const item = document.createElement('div');
+            item.className = 'rounded-xl bg-slate-50 dark:bg-slate-900 p-2';
+            item.innerHTML = `<strong class="text-brandBlue dark:text-blue-300">[${speaker}]</strong> <span class="text-slate-600 dark:text-slate-300">${text}</span>`;
+            logs.appendChild(item);
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function saveContinue() {
+            const story = novelsScenarios[currentScenarioId];
+            const node = story[currentSceneNode];
+            const progress = getProgress(currentScenarioId);
+            savedProgress[currentScenarioId] = { ...progress, sceneNode: currentSceneNode, lastSceneLabel: node.label };
+            persistState();
+            refreshAll();
+            showToast('이어보기 위치를 저장했습니다.');
+        }
+
+        function saveCurrentSceneCut() {
+            const story = novelsScenarios[currentScenarioId];
+            const node = story[currentSceneNode];
+            savedSceneCuts.unshift({ id: Date.now(), title: `${story.title} - ${node.label}`, mood: '뷰어에서 저장' });
+            persistState();
+            renderSavedCuts();
+            showToast('이 장면을 내 서재에 저장했습니다.');
+        }
+
+        function showOtherChoices() {
+            const node = novelsScenarios[currentScenarioId][currentSceneNode];
+            if (node.choices.length) {
+                showToast('현재 장면의 선택지를 다시 확인할 수 있습니다.');
+                renderViewerFrame();
+                return;
+            }
+            goBackToPreviousChoice();
+        }
+
+        function goBackToPreviousChoice() {
+            const previous = sceneHistory.pop();
+            if (!previous) {
+                currentSceneNode = 'start';
+                showToast('처음 장면으로 돌아갑니다.');
+            } else {
+                currentSceneNode = previous;
+                showToast('직전 선택지로 돌아왔습니다.');
+            }
+            renderViewerFrame();
+            pushAppHistory('reader', 'viewer');
+        }
+
+        function restartCurrentStory() {
+            startVisualNovel(currentScenarioId, { resume: false });
+        }
+
+        function openLightCreateFromViewer() {
+            const story = novelsScenarios[currentScenarioId];
+            const node = story[currentSceneNode];
+            document.getElementById('remix-title').value = `${story.title}의 다른 장면`;
+            document.getElementById('remix-character').value = node.speaker.replace('엔딩: ', '');
+            document.getElementById('remix-dialogue').value = node.text;
+            document.getElementById('remix-breadcrumb').innerText = `작품 > ${story.title} > 내 버전으로 장면 만들기`;
+            switchTab('light-create');
+            previewRemix();
+        }
+
+        function openLightCreateForNovel(id) {
+            currentScenarioId = id;
+            const story = novelsScenarios[id];
+            const node = story.start;
+            document.getElementById('remix-title').value = `${story.title}의 새 장면`;
+            document.getElementById('remix-character').value = node.speaker;
+            document.getElementById('remix-dialogue').value = node.text;
+            document.getElementById('remix-breadcrumb').innerText = `작품 > ${story.title} > 내 버전으로 장면 만들기`;
+            switchMode('reader', 'light-create');
+            previewRemix();
+        }
+
+        function openLightCreateFromHome() {
+            openLightCreateForNovel(currentScenarioId);
+        }
+
+        function returnToViewer() {
+            if (currentTab === 'light-create' && hasScenario(currentScenarioId)) {
+                switchMode('reader', 'viewer');
+                renderViewerFrame();
+            }
+        }
+
+        // 외부 API 연결 없이 샘플 문장으로 다듬는 데모 보조 기능입니다.
+        function polishDialogue() {
+            const textarea = document.getElementById('remix-dialogue');
+            const character = document.getElementById('remix-character').value || '그 아이';
+            textarea.value = `${character}는 잠시 숨을 고른 뒤 말했다. "${textarea.value.replace(/"/g, '').trim()} 그래도 지금이라면, 우리 손으로 다음 장면을 고를 수 있어."`;
+            showToast('대사를 조금 더 자연스럽게 다듬었습니다.');
+        }
+
+        function suggestChoices() {
+            const mood = document.getElementById('remix-mood').value;
+            const samples = {
+                mystery: ['문 뒤의 인기척을 따라간다', '책상 위에 남은 쪽지를 먼저 읽는다'],
+                warm: ['솔직한 마음을 전한다', '아무 말 없이 곁에 앉는다'],
+                urgent: ['곧장 계단 아래로 뛰어간다', '문을 막고 시간을 번다'],
+                comic: ['괜히 멋있는 척한다', '일단 간식을 꺼내 분위기를 바꾼다']
+            };
+            document.getElementById('remix-choice-1').value = samples[mood][0];
+            document.getElementById('remix-choice-2').value = samples[mood][1];
+            showToast('분위기에 맞는 선택지를 채웠습니다.');
+        }
+
+        function previewRemix() {
+            const title = document.getElementById('remix-title').value;
+            const character = document.getElementById('remix-character').value;
+            const dialogue = document.getElementById('remix-dialogue').value;
+            const choice1 = document.getElementById('remix-choice-1').value;
+            const choice2 = document.getElementById('remix-choice-2').value;
+            document.getElementById('remix-preview').innerHTML = `
+                <div class="mb-auto"><p class="text-xs text-white/60">장면 미리보기</p><h3 class="mt-1 font-serif text-2xl font-black">${title}</h3></div>
+                <div class="rounded-2xl bg-white/10 border border-white/15 p-4 backdrop-blur">
+                    <span class="rounded-lg bg-blue-600 px-3 py-1 text-xs font-black">${character}</span>
+                    <p class="mt-3 text-sm leading-relaxed">${dialogue}</p>
+                    <div class="mt-4 grid gap-2 text-xs"><span class="rounded-lg bg-white/10 p-2">1. ${choice1}</span><span class="rounded-lg bg-white/10 p-2">2. ${choice2}</span></div>
+                </div>
+            `;
+        }
+
+        function saveRemixToLibrary() {
+            previewRemix();
+            savedSceneCuts.unshift({ id: Date.now(), title: document.getElementById('remix-title').value, mood: '내 버전 장면' });
+            persistState();
+            renderSavedCuts();
+            showToast('내 서재에 장면을 저장했습니다.');
+            switchMode('reader', 'library');
+        }
+
+        function sendRemixToCreator() {
+            document.getElementById('studio-speaker').value = document.getElementById('remix-character').value || '리아';
+            document.getElementById('studio-dialogue').value = document.getElementById('remix-dialogue').value || '';
+            switchMode('creator', 'scene-editor');
+            setTimeout(drawStudioCanvas, 40);
+            showToast('창작자 센터의 장면 만들기로 옮겼습니다.');
+        }
+
+        // 기존 canvas 기반 장면 컷 제작 기능을 스토리 컷 메이커로 유지합니다.
+        function drawStudioCanvas() {
+            const canvas = document.getElementById('studio-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const bgMood = document.getElementById('studio-bg').value;
+            const grad = ctx.createLinearGradient(0, 0, 1280, 720);
+            const colors = {
+                midnight: ['#1E1B4B', '#080516'],
+                deepsea: ['#062F4F', '#020C1B'],
+                sunset: ['#7C2D12', '#1A0B05'],
+                forest: ['#064E3B', '#021E17']
+            };
+            grad.addColorStop(0, colors[bgMood][0]);
+            grad.addColorStop(1, colors[bgMood][1]);
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 1280, 720);
+
+            if (document.getElementById('studio-speedlines').value === 'on') {
+                ctx.save();
+                ctx.strokeStyle = 'rgba(255,255,255,.08)';
+                ctx.lineWidth = 2.5;
+                for (let a = 0; a < 360; a += 4) {
+                    const r = a * Math.PI / 180;
+                    ctx.beginPath();
+                    ctx.moveTo(640 + Math.cos(r) * 220, 360 + Math.sin(r) * 220);
+                    ctx.lineTo(640 + Math.cos(r) * 900, 360 + Math.sin(r) * 900);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            drawCharacter(ctx, 'char1', 320, 560);
+            drawCharacter(ctx, 'char2', 960, 560);
+
+            const vigGrad = ctx.createRadialGradient(640, 360, 250, 640, 360, 720);
+            vigGrad.addColorStop(0, 'rgba(0,0,0,0)');
+            vigGrad.addColorStop(1, 'rgba(0,0,0,.55)');
+            ctx.fillStyle = vigGrad;
+            ctx.fillRect(0, 0, 1280, 720);
+
+            if (document.getElementById('studio-hide-text').value === 'off') {
+                drawDialogueBox(ctx);
+            }
+        }
+
+        function drawCharacter(ctx, prefix, baseX, baseY) {
+            if (!document.getElementById(`${prefix}-active`).checked) return;
+            const scale = parseFloat(document.getElementById(`${prefix}-scale`).value);
+            const xOffset = parseInt(document.getElementById(`${prefix}-x`).value, 10);
+            const flip = document.getElementById(`${prefix}-flip`).checked;
+            const skin = document.getElementById(`${prefix}-skin`).value;
+            const emoji = document.getElementById(`${prefix}-emoji`).value;
+            const palette = {
+                indigo: ['#93C5FD', '#2563EB'],
+                pink: ['#FBCFE8', '#DB2777'],
+                amber: ['#FDE047', '#D97706'],
+                slate: ['#CBD5E1', '#475569'],
+                cyan: ['#67E8F9', '#0891B2']
+            };
+            ctx.save();
+            ctx.translate(baseX + xOffset, baseY);
+            if (flip) ctx.scale(-1, 1);
+            ctx.scale(scale, scale);
+            const bodyGrad = ctx.createLinearGradient(-80, -220, 80, 20);
+            bodyGrad.addColorStop(0, palette[skin][0]);
+            bodyGrad.addColorStop(1, palette[skin][1]);
+            ctx.fillStyle = bodyGrad;
+            ctx.beginPath();
+            ctx.arc(0, -110, 72, Math.PI, 0, false);
+            ctx.lineTo(74, 42);
+            ctx.lineTo(-74, 42);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(0, -110, 34, 0, Math.PI * 2, true);
+            ctx.fill();
+            ctx.font = '34px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(emoji, 0, -110);
+            ctx.restore();
+        }
+
+        function drawDialogueBox(ctx) {
+            const speaker = document.getElementById('studio-speaker').value;
+            const speakerColor = document.getElementById('studio-speaker-color').value;
+            const dialogue = document.getElementById('studio-dialogue').value;
+            ctx.fillStyle = 'rgba(6,9,20,.9)';
+            ctx.strokeStyle = 'rgba(255,255,255,.14)';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.roundRect(40, 520, 1200, 160, 20);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = speakerColor;
+            ctx.beginPath();
+            ctx.roundRect(65, 542, 160, 34, 8);
+            ctx.fill();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(speaker, 145, 564);
+            ctx.font = '20px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#F3F4F6';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 3.5;
+            wrapCanvasText(ctx, dialogue, 70, 612, 1120, 28);
+        }
+
+        function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
+            let line = '';
+            for (const char of text.split('')) {
+                const test = line + char;
+                if (ctx.measureText(test).width > maxWidth) {
+                    ctx.strokeText(line, x, y);
+                    ctx.fillText(line, x, y);
+                    line = char;
+                    y += lineHeight;
+                } else {
+                    line = test;
+                }
+            }
+            ctx.strokeText(line, x, y);
+            ctx.fillText(line, x, y);
+        }
+
+        function downloadStudioCg() {
+            const canvas = document.getElementById('studio-canvas');
+            const link = document.createElement('a');
+            link.download = `varchar_scene_cut_${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            showToast('이 장면을 이미지로 저장했습니다.');
+        }
+
+        function saveCgToMyLibrary() {
+            savedSceneCuts.unshift({ id: Date.now(), title: `${document.getElementById('studio-speaker').value}의 장면 컷`, mood: '스토리 컷 메이커' });
+            persistState();
+            renderSavedCuts();
+            showToast('내 서재에 장면 컷을 보관했습니다.');
+        }
+
+        function renderCreator() {
+            document.getElementById('creator-work-list').innerHTML = novels.slice(0, 3).map(novel => `
+                <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-5 shadow-sm">
+                    <p class="text-xs text-slate-500">수정 중</p>
+                    <h3 class="mt-1 font-black">${novel.title}</h3>
+                    <p class="mt-2 text-sm text-slate-500">장면 ${Math.round(novel.choices * 1.8)}개 · 선택지 ${novel.choices}개 · 엔딩 ${novel.endings}개</p>
+                    <div class="mt-4 flex gap-2">
+                        <button onclick="switchTab('scene-editor')" class="rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-4 py-2.5 text-xs font-black">장면 만들기</button>
+                        <button onclick="startVisualNovel('${novel.id}', { resume: true })" class="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-xs font-black">미리보기</button>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('branch-map').innerHTML = ['시작 장면', '선택지 장면', '엔딩 장면'].map((title, idx) => `
+                <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard p-5 shadow-sm">
+                    <p class="text-xs text-slate-500">노드 ${idx + 1}</p>
+                    <h3 class="mt-1 font-black">${title}</h3>
+                    <p class="mt-2 text-sm text-slate-500">${idx === 2 ? '엔딩으로 연결' : '다음 장면 2개로 분기'}</p>
+                </div>
+            `).join('');
+        }
+
+        function refreshAll() {
+            renderNovels();
+            renderRanking();
+            renderLibrary();
+            renderCreator();
+            if (currentTab === 'work-detail') openWorkDetail(currentDetailId);
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            lucide.createIcons();
+        }
+
+        function openAuthModal() {
+            document.getElementById('auth-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+
+        function checkPasswordStrength(value) {
+            const indicator = document.getElementById('pwd-validator');
+            indicator.innerText = value.length >= 8 ? '비밀번호 길이가 충분합니다.' : '비밀번호는 8자 이상이어야 합니다.';
+            indicator.className = value.length >= 8 ? 'text-[11px] font-bold text-emerald-500' : 'text-[11px] font-bold text-rose-500';
+        }
+
+        function submitJoinForm() {
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+            if (!email.includes('@')) {
+                showToast('이메일 형식을 확인해주세요.');
+                return;
+            }
+            if (password.length < 8) {
+                showToast('비밀번호는 8자 이상이어야 합니다.');
+                return;
+            }
+            isLoggedIn = true;
+            updateAuthButton();
+            closeAuthModal();
+            showToast('계정으로 시작했습니다. 이어보기 기록을 보관할 수 있어요.');
+        }
+
+        function guestStart() {
+            closeAuthModal();
+            showToast('비회원 샘플로 시작합니다. 저장은 이 브라우저 안에서만 유지됩니다.');
+            openWorkDetail('lia');
+        }
+
+        function handleSocialConnect(provider) {
+            isLoggedIn = true;
+            updateAuthButton();
+            closeAuthModal();
+            showToast(`${provider} 계정으로 시작했습니다.`);
+        }
+
+        function updateAuthButton() {
+            const btn = document.getElementById('auth-button');
+            btn.innerText = isLoggedIn ? '내 계정' : '로그인';
+        }
+
+        function parseRouteHash() {
+            const raw = location.hash.replace(/^#/, '');
+            if (!raw) return null;
+            const parts = raw.split('/').map(decodeURIComponent);
+            const [mode, tab, a, b] = parts;
+            if (!mode || !tab) return null;
+            return {
+                mode,
+                tab,
+                detailId: tab === 'work-detail' ? a : currentDetailId,
+                scenarioId: tab === 'viewer' || tab === 'light-create' ? (a || currentScenarioId) : currentScenarioId,
+                sceneNode: tab === 'viewer' ? (b || 'start') : currentSceneNode
+            };
+        }
+
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'pointer-events-auto translate-y-2 opacity-0 rounded-2xl border border-slate-700/50 bg-slate-900/95 px-4 py-3 text-xs font-semibold text-white shadow-xl transition-all duration-300';
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 30);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 2800);
+        }
+
+        window.onload = function () {
+            renderNovels();
+            renderRanking();
+            renderReviews();
+            renderLibrary();
+            renderCreator();
+            updateAuthButton();
+            document.querySelectorAll('.genre-btn').forEach((btn, idx) => {
+                btn.className = idx === 0
+                    ? 'genre-btn active rounded-full px-4 py-2 text-xs font-bold bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                    : 'genre-btn rounded-full px-4 py-2 text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300';
+            });
+            const route = parseRouteHash();
+            if (route) {
+                history.replaceState(route, '', routeHash(route));
+                restoreAppHistory(route);
+            } else {
+                isRestoringHistory = true;
+                switchMode('reader', 'works');
+                isRestoringHistory = false;
+                pushAppHistory('reader', 'works', true);
+            }
+            lucide.createIcons();
+        };
+
+        window.addEventListener('popstate', event => {
+            restoreAppHistory(event.state || parseRouteHash());
+        });
+    </script>
+</body>
+</html>
